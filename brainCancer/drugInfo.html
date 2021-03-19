@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html" />
+    <title>药品信息 - </title>
+    <script src="https://cdn.jsdelivr.net/npm/neo4j-driver@4.1.2/lib/browser/neo4j-web.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="js/vue.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="icon" href="favicon.ico">
+
+    <style>
+        #main {
+            padding: 3rem 15rem 0 5rem;
+        }
+
+        #intro-block {
+            margin-bottom: 3rem;
+        }
+
+        #drug-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 1rem
+        }
+
+        .mg-bt2 {
+            margin-bottom: 2rem;
+        }
+
+        .mg-bt1 {
+            margin-bottom: 10px;
+        }
+
+        .card-header a {
+            font-size: 18px;
+            font-weight: bold;
+            color: black;
+        }
+
+        .card-header a:hover {
+            color: #555555;
+            text-decoration: none;
+        }
+
+        .pd-left {
+            padding-left: 2rem;
+        }
+
+        #en-reaction {
+            margin-bottom: 3rem;
+        }
+
+        .no-wrap {
+            display: inline-block;
+            white-space: nowrap;
+            width: 200px
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div id="main" v-if="finished">
+        <div id="intro-block">
+            <div id="drug-name">{{ subjectInfo.name }}</div>
+            <div id="intro" v-if="subjectInfo.hasOwnProperty('indication')">&emsp;&emsp;{{ subjectInfo.indication }}
+            </div>
+        </div>
+        <div id="reaction-block">
+            <div class="mg-bt1" style="font-size: 18px;">药物相互作用</div>
+            <div>
+                <div class="card mg-bt2" v-for="relation in relations">
+                    <div class="card-header"><a :href="'drugInfo.html?id=' + relation.object ">{{ relation.object }}</a></div>
+                    <div style="padding: 1rem 0 1rem 2rem;">
+                        <div class="mg-bt1"><img src="img/exclamation-circle.svg" width="12px">&ensp;预警级别</div>
+                        <div class="mg-bt1">
+                            <div style="display: inline-block; margin-right: 2rem;">
+                                <div class="progress" style="width: 200px">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                        role="progressbar" :style="'width:'+(120-relation.level*25).toString() + '%' "
+                                        :aria-valuenow="120-relation.level*25" aria-valuemin="0" aria-valuemax="100"
+                                        :class="color_list[relation.level]"></div>
+                                </div>
+                            </div>
+                            <div class="statement" style="display: inline-block;">{{ relation.statement }}</div>
+                        </div>
+                        <div v-if="relation.hasOwnProperty('intro')">
+                            <div class="mg-bt1"><img src="img/exclamation-circle.svg" width="12px">&ensp;作用机理</div>
+                            <div class="reaction-intro">{{ relation.intro }}</div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <div id="en-reaction" v-if="en_reaction.hasOwnProperty(subjectInfo.name)">
+            <div class="mg-bt1" style="font-size: 18px;">其他相互作用药物</div>
+            <div style="border: 1px solid rgba(0,0,0,.125); padding-left: 2rem;">
+                <div class="no-wrap" v-for="v in en_reaction[subjectInfo.name]">
+                    <span class="no-wrap">{{ v }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        var start = window.location.href.search(/\?id=.+/i) + 4
+        var id = decodeURI(window.location.href.slice(start))
+
+        document.getElementsByTagName("title")[0].innerText = '药品信息 - ' + id;
+
+        var driver = neo4j.driver(
+            'neo4j://8.129.98.4/',
+            neo4j.auth.basic('neo4j', 'lumen')
+        )
+
+
+        var vm = new Vue({
+            el: '#main',
+            data: {
+                subjectInfo: {},
+                relations: [],
+                finished: false,
+                color_list: ["", "bg-danger", "bg-warning", "bg-info", "bg-success"],
+                en_reaction: {"头孢曲松": ["Probenecid", "Warfarin"],
+                                "地塞米松": ["Diethylstilbestrol", "Diflunisal", "Dipyridamole","Disopyramide",
+                                            'Etoricoxib','Everolimus','Exenatide','Famciclovir', 'Felbamate', 
+                                            'Fentanyl', 'Fexofenadine', 'Fidaxomicin', 'Finasteride', 'Rotigotine',
+                                             'Ruxolitinib', 'Salmeterol', 'Saquinavir', 'Saxagliptin', 'Selegiline', 
+                                             'Selexipag', 'Sertindole', 'Trazodone', 'Triazolam', 'Trifluoperazine', 'Tolterodine',
+                                             'Toremifene', 'Tramadol', 'Trastuzumab emtansine', 'Trazodone', 'Triazolam',
+                                             'Triflupromazine', 'Trimethadione', 'Trimethoprim', 'Trimipramine', 'Troglitazone',
+                                              'Umeclidinium', 'Valdecoxib', 'Vandetanib', 'Vecuronium', 'Venetoclax',
+                                              'Zalcitabine', 'Zaleplon', 'Zileuton', 'Ziprasidone', 'Zonisamide', ],
+                                "卡马西平": ['Cyclizine', 'Cyclobenzaprine', 'Cyclosporine', 'Cyproheptadine', 'Dabigatran etexilate', 
+                                'Danazol', 'Dapiprazole', 'Dapsone', 'Darifenacin', 'Etizolam', 'Etodolac', 'Etoposide', 'Etoricoxib', 
+                                'Etorphine', 'Everolimus', 'Famciclovir', 'Felbamate', 'Fencamfamine', 'Fentanyl', 'Lumacaftor',
+                                 'Lumiracoxib', 'Lurasidone', 'Maprotiline', 'Maraviroc', 'Mebendazole', 'Medrysone', 'Megestrol acetate',
+                                 'Melatonin', 'Meloxicam', 'Mephenytoin', 'Mepivacaine', 'Meprobamate', 'Oxprenolol', 'Oxymorphone', 'Palbociclib', 'Paliperidone', 'Palonosetron',
+                                 'Quinidine', 'Rabeprazole', 'Raclopride', 'Raloxifene', 'Ranitidine', 'Tacrine', 'Tacrolimus', 'Tadalafil', 'Tamoxifen', 'Tamsulosin']}
+            },
+            methods: {
+                get_drug: function () {
+                    var session = driver.session({ defaultAccessMode: neo4j.session.READ });
+                    var match_string = "MATCH (n1:`药物`)-[r:`相互作用`]-(n2:`药物`) where n1.value='" + id + "' return n1,r,n2 limit 5"
+                    session
+                        .run(match_string)
+                        .then(result => {
+                            var count = 0
+                            result.records.forEach(record => {
+                                var temp = {};
+                                if (count == 0) {
+                                    this.subjectInfo['name'] = record.get('n1').properties.value
+                                    if (record.get('n1').properties.hasOwnProperty('indication')) {
+                                        this.subjectInfo['indication'] = record.get('n1').properties.indication
+                                    }
+                                    count = 1
+                                }
+                                temp['object'] = record.get('n2').properties.value
+                                temp['level'] = record.get('r').properties.level
+                                temp['statement'] = record.get('r').properties.statement
+                                if (record.get('r').properties.hasOwnProperty('intro')) {
+                                    temp['intro'] = record.get('r').properties.intro
+                                }
+                                this.relations.push(temp)
+                            })
+                            this.finished = true;
+                        })
+                        .catch(error => {
+                            console.log(error)
+                        })
+                        .then(() => session.close())
+                }
+            },
+            created: function () {
+                this.get_drug();
+            }
+        })
+
+
+    </script>
+</body>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>ASD知识图谱查询系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/neo4j-driver@4.1.2/lib/browser/neo4j-web.min.js"></script>
+    <script src="js/echarts.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/ASD.css" rel="stylesheet" />
+
+
+    <style>
+        #search {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        #search-form {
+            width: 40%;
+            padding: 3rem 0 3rem 0;
+            min-width: 300px;
+            margin: 0 auto;
+        }
+
+        #search-form select {
+            width: 6rem;
+        }
+
+        #search-summary {
+            margin: 0 0 1rem 1rem;
+        }
+
+        #search-result {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        #search-result table th {
+            font-size: 18px;
+        }
+
+        #search-result table td {
+            padding-right: 2rem;
+        }
+
+        #search-result table a {
+            margin-right: 0.5rem;
+            display: inline;
+            color: #444444;
+        }
+
+        #search-result table a:hover {
+            color: black;
+        }
+
+        #page-btns {
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        #page-btns div {
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="top">
+        <div class="myfl"><img src="img/logo.png" height="120" width="182" /></div>
+        <div id="nav">
+            <ul class="mynav">
+                <li><a href="../rainbow-ASD/index.php">系统简介</a></li>
+            </ul>
+            <ul class="nav1">
+                <li><a href="#">文献查询</a></li>
+            </ul>
+            <ul class="mynav">
+                <li><a href="../rainbow-ASD/KnowledgeMap.php">学科知识图谱</a></li>
+                <li><a href="../rainbow-ASD/download.php">相关下载</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="search">
+        <div id="search-form" class="input-group">
+            <div class="input-group-btn">
+                <select class="custom-select" v-model="field">
+                    <option value='题名'>题名</option>
+                    <option value='关键词'>关键词</option>
+                    <option value='作者'>作者</option>
+                    <option value='期刊'>期刊</option>
+                    <option value='机构'>机构</option>
+                </select>
+            </div>
+            <input type="text" class="form-control" v-model="input" v-on:keyup.enter="search()">
+            <button type="button" class="btn" @click="search()" style="margin-left: 3px;">
+                <img src="img/search.svg" alt="搜索">
+            </button>
+        </div>
+    </div>
+
+    <div id="search-result">
+        <div id="search-summary" v-if="search_completed && (current_page == 1)">
+            <span>搜索完成，共搜索到 {{ search_result_count }} 篇文献</span>
+        </div>
+        <table class="table" v-if="search_completed">
+            <tr>
+                <th>题名</th>
+                <th>作者</th>
+                <th>来源</th>
+                <th style="min-width: 100px;">发表年份</th>
+            </tr>
+            <tr v-for="item in search_result" :key="item.id">
+                <td><a :href="'detail.html?id=' + item.id" target="_blank"><span>{{ item.title }}</span></a></td>
+                <td><a v-for="author in item.author" href="javascript:;" @click="search_new('作者', author)">
+                        <span>{{ author }}</span>
+                    </a></td>
+                <td><a href="javascript:;" @click="search_new('期刊', item.source)"><span>{{ item.source }}</span></a>
+                </td>
+                <td><span>{{ item.years }}</span></td>
+            </tr>
+        </table>
+        <div id="page-btns" class="btn-toolbar" role="toolbar" v-if="total_page > 1">
+            <div class="btn-group" role="group" aria-label="First group">
+                <button id="prev" :disabled="current_page == 1" type="button" class="btn btn-light"
+                    @click="change_page_to(current_page-1)">上一页</button>
+                <button id="first-page" v-if="current_page >= 4" type="button" class="btn btn-light"
+                    @click="change_page_to(1)">1</button>
+                <button v-if="current_page >= 5" type="button" class="btn btn-light" disabled>...</button>
+                <button id="front-2" v-if="current_page >= 3" type="button" class="btn btn-light"
+                    @click="change_page_to(current_page-1)" :key="current_page-2">{{current_page - 2}}</button>
+                <button id="front-1" v-if="current_page >= 2" type="button" class="btn btn-light"
+                    @click="change_page_to(current_page-1)" :key="current_page-1">{{current_page - 1}}</button>
+                <button id="current" type="button" class="btn btn-secondary">{{current_page}}</button>
+                <button id="rear-1" v-if="(total_page-current_page) >= 1" type="button" class="btn btn-light"
+                    @click="change_page_to(current_page+1)" :key="current_page+1">{{current_page + 1}}</button>
+                <button id="rear-2" v-if="(total_page-current_page) >= 2" type="button" class="btn btn-light"
+                    @click="change_page_to(current_page+2)" :key="current_page+2">{{current_page + 2}}</button>
+                <button v-if="(total_page-current_page) >= 4" type="button" class="btn btn-light" disabled>...</button>
+                <button id="last-page" v-if="(total_page-current_page) >= 3" type="button" class="btn btn-light"
+                    @click="change_page_to(total_page)">{{ total_page }}</button>
+                <button id="next" :disabled="total_page == current_page" type="button" class="btn btn-light"
+                    @click="change_page_to(current_page+1)">下一页</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer" v-if="show">
+        <div class="follow_on">
+            <dl class="soft_download myfl">
+                <dt>Autistic Spectrum Disorder</dt>
+                <dd>
+                    <li>&nbsp;</li>
+                </dd>
+                <dd>
+                    <li>本系统为自闭症跨学科知识图谱查询系统。</li>
+                </dd>
+                <dd>
+                    <li>本系统提供了自闭症跨学科知识图谱查询以及相关文献数据的下载功能。</li>
+                </dd>
+                <dd>
+                    <li>本系统是教育部人文社会科学重点研究基地重大项目“大数据资源的挖掘与服务研究——面向医疗健康领域”（批准号：17JJD870002)的成果之一。</li>
+                </dd>
+            </dl>
+            <dl class="myfl">
+                <dt>联系方式</dt>
+                <dd>
+                    <li>&nbsp;</li>
+                </dd>
+                <dd>
+                    <li>E-mai：Sukra1@outlook.com</li>
+                </dd>
+                <dd>
+                    <li>电话：13163260400</li>
+                </dd>
+                <dd>
+                    <li>qq：929442854</li>
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+
+    <script>
+        var rem = parseFloat($("html").css('font-size'));
+        var minHeight = window.innerHeight - $("#top").height() - $("#search").height() - $("#footer").height() - 2 * rem - 1
+        $("#blank").css("height", minHeight);
+        $("#search-result").css("min-height", minHeight);
+
+        var driver = neo4j.driver(
+            'neo4j://8.129.98.4/',
+            neo4j.auth.basic('neo4j', 'lumen')
+        )
+
+        function trim_author(str) {
+            if (typeof (str) == "undefined") {
+                return []
+            }
+            if (str.slice(-1) == ';') {
+                str = str.slice(0, str.length - 1)
+            }
+            return str.split(";")
+        }
+
+        var vs = new Vue({
+            el: '#search',
+            data: {
+                field: '题名',
+                input: '',
+
+            },
+            methods: {
+                search: function () {
+                    vr.do_search(this.field, this.input);
+                }
+            },
+        })
+
+        var vr = new Vue({
+            el: "#search-result",
+            data: {
+                search_completed: false,
+                search_result_count: 0,
+                search_result: [],
+                current_page: 0,
+                total_page: 0,
+            },
+            methods: {
+                get_count: function (field, input) {
+                    var session = driver.session({ defaultAccessMode: neo4j.session.READ });
+                    var match_string;
+                    if (field == "题名") {
+                        match_string = "MATCH (d:`文献`) WHERE d.title=~'.*" + input + ".*' return count(d)"
+                    }
+                    else {
+                        match_string = "match (n: `" + field + "`)-->(d:`文献`) where n.value=~'.*" + input + ".*' return count(d)"
+                    }
+                    session
+                        .run(match_string)
+                        .then(result => {
+                            this.search_result_count = result.records[0].get('count(d)').low
+                            this.total_page = Math.ceil(this.search_result_count / 20)
+                        })
+                        .catch(error => {
+                            console.log(error)
+                        })
+                        .then(() => session.close())
+                },
+                get_data: function (field, input, skip) {
+                    this.search_completed = false;
+                    this.search_result.length = 0;
+                    var session = driver.session({ defaultAccessMode: neo4j.session.READ });
+                    var match_string;
+                    if (field == "题名") {
+                        match_string = "MATCH (d:`文献`) WHERE d.title=~'.*" + input + ".*' return d skip " + ((skip - 1) * 20).toString() + " limit 20"
+                    }
+                    else {
+                        match_string = "match (n: `" + field + "`)-->(d:`文献`) where n.value=~'.*" + input + ".*' return d skip " + ((skip - 1) * 20).toString() + " limit 20"
+                    }
+                    session
+                        .run(match_string)
+                        .then(result => {
+                            result.records.forEach(record => {
+                                var temp = {};
+                                var data = record.get('d');
+                                temp['id'] = data.identity.low
+                                temp['title'] = data.properties.title;
+                                temp['author'] = trim_author(data.properties.author)
+                                temp['source'] = data.properties.source;
+                                temp['years'] = data.properties.years
+                                this.search_result.push(temp)
+                            })
+                        })
+                        .catch(error => {
+                            console.log(error)
+                        })
+                        .then(() => this.search_completed = true)
+                        .then(() => session.close())
+                },
+                do_search: function (field, input, skip = 1) {
+                    if (skip == 1) {
+                        this.get_count(field, input);
+                    }
+                    this.get_data(field, input, skip);
+                    this.current_page = skip;
+                },
+                search_new: function (field, input) {
+                    vs.field = field;
+                    vs.input = input;
+                    this.do_search(field, input)
+                },
+                change_page_to: function (page) {
+                    this.do_search(vs.field, vs.input, page);
+                }
+            },
+        })
+
+
+    </script>
+</body>
+
+</html>

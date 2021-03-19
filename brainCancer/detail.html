@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>ASD知识图谱查询系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/neo4j-driver@4.1.2/lib/browser/neo4j-web.min.js"></script>
+    <script src="js/echarts.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/ASD.css" rel="stylesheet" />
+
+    <style>
+
+        #main {
+            border: 2px solid gray;
+            box-shadow: 0 0 10px 5px #bbbbbb;
+            width: 70%;
+            height: 450px;
+            margin: 3rem auto;
+        }
+
+        #mycontent {
+            width: 70%;
+            margin: 3rem auto;
+        }
+
+        #mycontent table tr td:nth-child(1) {
+            font-weight: bold;
+            width: 130px;
+            padding: 6px;
+            border: 0;
+            float: left;
+            font-size: 18px;
+        }
+
+        #mycontent table tr td:nth-child(2) {
+            word-break: normal;
+            padding: 6px;
+            border: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="top">
+        <div class="myfl"><img src="img/logo.png" height="120" width="182" /></div>
+        <div id="nav">
+            <ul class="mynav">
+                <li><a href="../rainbow-ASD/index.php">系统简介</a></li>
+            </ul>
+            <ul class="nav1">
+                <li><a href="#">文献查询</a></li>
+            </ul>
+            <ul class="mynav">
+                <li><a href="../rainbow-ASD/KnowledgeMap.php">学科知识图谱</a></li>
+                <li><a href="../rainbow-ASD/download.php">相关下载</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="mycontent">
+        <table class="table">
+            <tr>
+                <td>题名</td>
+                <td>{{ title }}</td>
+            </tr>
+            <tr>
+                <td>作者</td>
+                <td>{{ author }}</td>
+            </tr>
+            <tr>
+                <td>摘要</td>
+                <td>{{ abstract }}</td>
+            </tr>
+            <tr>
+                <td>关键词</td>
+                <td>{{ keyword }}</td>
+            </tr>
+            <tr>
+                <td>期刊</td>
+                <td>{{ periodical }}</td>
+            </tr>
+            <tr>
+                <td>机构</td>
+                <td>{{ organization }}</td>
+            </tr>
+        </table>
+    </div>
+    <div id="main"></div>
+
+    <script>
+
+        var driver = neo4j.driver(
+            'neo4j://8.129.98.4/',
+            neo4j.auth.basic('neo4j', 'lumen')
+        )
+
+        var start = window.location.href.search(/\?id=\d+/i) + 4
+        var id = window.location.href.slice(start)
+        var categories = [{ name: "文献" }, { name: "关键词" }, { name: "作者" }, { name: "机构" }, { name: "期刊" }];
+        var data = [];
+        var graph_data = { data: [], links: [] }
+
+        function trim_(str) {
+            if (str.slice(-1) == ';') {
+                str = str.slice(0, str.length - 1)
+            }
+            return str
+        }
+
+        var vm = new Vue({
+            el: '#mycontent',
+            data: {
+                title: '',
+                author: '',
+                abstract: '',
+                keyword: '',
+                organization: '',
+                periodical: '',
+            }
+        })
+
+        var get_data = function () {
+            var session = driver.session({ defaultAccessMode: neo4j.session.READ })
+            var temp_a;
+            var count = 0
+
+            session
+                .run('match (n)-[r]->(a:`文献`) where id(a)=' + id + ' return a,r,n',
+            )
+
+                .then(result => {
+                    result.records.forEach(record => {
+                        if (count == 0) {
+                            temp_a = record.get('a')
+                        }
+                        dic = {}
+                        dic['end'] = record.get('a').properties.title
+                        dic['relation'] = record.get('r')
+                        dic['start'] = record.get('n')
+                        data.push(dic)
+                        count++
+                    })
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+                .then(() => {
+                    vm.title = temp_a.properties.title;
+                    vm.author = trim_(temp_a.properties.author);
+                    vm.abstract = temp_a.properties.abstract;
+                    vm.keyword = temp_a.properties.keyword;
+                    vm.organization = trim_(temp_a.properties.institute);
+                    vm.periodical = temp_a.properties.source;
+                    transform_data();
+                    init_chart();
+                })
+                .then(() => session.close())
+        }
+
+        var transform_data = function () {
+            graph_data['data'].push({
+                name: data[0].end,
+                des: data[0].end,
+                symbolSize: 80,
+                categories: 0,
+            })
+            for (var i in data) {
+                var cate_ind;
+                for (var ind = 0; ind < 5; ind++) {
+                    if (data[i].start.labels[0] == categories[ind].name) {
+                        cate_ind = ind;
+                        break;
+                    }
+                }
+                graph_data['data'].push({
+                    name: data[i].start.properties.value,
+                    des: data[i].start.properties.value,
+                    symbolSize: 60,
+                    category: cate_ind
+                })
+                graph_data['links'].push({
+                    source: data[i].start.properties.value,
+                    target: data[i].end,
+                    name: data[i].relation.type,
+                    des: ''
+                })
+            }
+        }
+
+        var init_chart = function () {
+            var myChart = echarts.init(document.getElementById('main'));
+            option = {
+                title: {
+                    text: '文献关系图'
+                },
+                tooltip: {
+                    formatter: function (x) {
+                        return x.data.des;
+                    }
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        dataZoom: {
+                            show: true
+                        },
+                        restore: {
+                            show: true
+                        },
+                        saveAsImage: {
+                            show: true
+                        },
+                    }
+                },
+                legend: [{
+
+                    data: categories.map(function (a) {
+                        return a.name;
+                    })
+                }],
+                series: [{
+                    type: 'graph', 
+                    layout: 'force', 
+                    force: {
+                        repulsion: 800,
+                        friction: 0.8,
+                        edgeLength: [80, 160]
+                    },
+                    symbolSize: 40,
+                    roam: true, 
+                    edgeSymbol: ['circle', 'arrow'],
+                    edgeSymbolSize: [2, 10],
+                    edgeLabel: {
+                        normal: {
+                            textStyle: {
+                                fontSize: 20
+                            }
+                        }
+                    },
+                    draggable: true,
+                    lineStyle: {
+                        normal: {
+                            width: 2,
+                            color: '#4b565b',
+                        }
+                    },
+                    edgeLabel: {
+                        normal: {
+                            show: true,
+                            formatter: function (x) {
+                                return x.data.name;
+                            }
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: true,
+                            textStyle: {}
+                        }
+                    },
+                    data: graph_data['data'],
+                    links: graph_data['links'],
+                    categories: categories
+                }]
+            };
+            myChart.setOption(option);
+        }
+
+        get_data();
+    </script>
+</body>

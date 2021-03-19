@@ -1,0 +1,443 @@
+body {
+    width: 100%;
+    background-color: #f8f8f8;
+    max-width: 1920px;
+    min-width: 768px;
+}
+
+#header {
+    width: 100%;
+    height: 4rem;
+    padding: 0 2rem 0 2rem;
+    color: white;
+}
+
+#header-right {
+    height: 4rem; 
+    float:right; 
+    display:inline-flex;
+}
+
+#header-right div {
+    align-self: center;
+}
+
+#header a {
+    color: white;
+}
+
+#header a:hover {
+    text-decoration: none;
+    color: #dddddd;
+}
+
+#input-box img {
+    position: absolute;
+    margin: 9px;
+}
+
+#input-box input {
+    padding-left: 40px;
+}
+
+#search {
+    display: inline-block;
+    padding-right: 1rem;
+}
+
+#search-result div {
+    width: 100%;
+}
+
+#search-result {
+    color: black;
+    width: 300px;
+}
+
+#search-result p {
+    background-color:#d6d8db;
+    padding: 10px 0 10px 10px;
+    margin: 0;
+}
+
+#search-result .list-group-item {
+    padding: 8px 12px 8px 24px;
+}
+
+#search-result a {
+    color: black;
+}
+
+#search-result a:hover {
+    color: black;
+    background-color: #DDEDFF;
+}
+
+.list-group-item {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    overflow: hidden;
+}
+
+.list-group-item span {
+    color: brown;
+}
+
+#sidebar {
+    width: 22%;
+    min-width: 15rem;
+    height: 700px;
+}
+
+#selector {
+    display: inline-block;
+    width: 100%;
+    height: 4rem;
+    text-align: center;
+    padding-top: 1rem;
+}
+
+#selector span {
+    font-size: 22px;
+    font-family: sans-serif;
+}
+
+.notactive {
+    cursor: pointer;
+    color: #777777;
+}
+
+.nav-bar {
+    width: 100%;
+    max-height: 650px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+#main {
+    padding: 1rem 16px 0 16px;
+    width: 100%;
+    max-width: 1600px;
+    min-height: 710px;
+    flex-wrap: nowrap;
+}
+
+#content {
+    display: inline-block;
+    width: 77%;
+    padding-left: 16px;
+}
+
+#basic-info {
+    padding: 0 10px 16px 16px;
+}
+
+#basic-table-div {
+    display: inline-block;
+    margin-bottom: 16px;
+    max-width: 1200px;
+    width: 70%;
+}
+
+#table-up table {
+    display: inline-block;
+    width: 49%;
+    min-width: 310px;
+    vertical-align: top;
+    padding: 0 10px 0 0;
+    margin: 0;
+}
+
+#table-down table {
+    display: inline-block;
+    width: 100%;
+    min-width: 300px;
+    padding: 0 10px 0 0;
+}
+
+#table-up table span {
+    overflow-wrap: break-word;
+    word-break: break-all;
+}
+
+
+#basic-info table tr td:nth-child(odd),
+#card-nav table tr td:nth-child(odd) {
+    font-weight: bold;
+    width: 130px;
+    padding: 6px;
+    border: 0;
+    float: left;
+}
+
+#basic-info table tr td:nth-child(even),
+#card-nav table tr td:nth-child(even) {
+    word-break: normal;
+    padding: 6px;
+    border: 0;
+}
+
+#pics {
+    padding-left: 1rem;
+    vertical-align: top;
+    display: inline-block;
+    min-width: 260px;
+    max-width: 400px;
+    width: 28%;
+}
+
+.pic-caption-container {
+    padding: 0 24px 0 24px;
+}
+
+.pic-caption-container #img-locator {
+    width: 100%;
+    height: 0px;
+    padding-bottom: 100%;
+    position: relative;
+}
+
+#img-locator img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.pic-caption-container #caption {
+    display: inline-block;
+    padding-top: 10px;
+    text-align: center;
+    height: 6.8rem;
+}
+
+#other-info {
+    padding: 0 3rem 10px 10px;
+    border-color: #000000;
+}
+
+.linking {
+    color: #017CFF;
+}
+
+.linking:hover {
+    text-decoration: none;
+    color: #0156B3;
+}
+
+#card-nav table {
+    display: inline-block;
+    margin: 0;
+}
+
+.link-item {
+    display: inline; 
+    padding-right: 1.5rem;
+}
+
+.card-body {
+    padding: 10px 20px 10px 20px;
+    background-color: #f8f8f8;
+}
+
+.no-wrap {
+    white-space: nowrap;
+}
+
+.el-menu {
+    background-color: #f8f8f8;
+}
+
+.el-menu-item>span,
+.el-submenu__title>span {
+    display: inline-block;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.el-menu-item {
+    height: 40px !important;
+    line-height: 40px !important;
+}
+
+.el-menu-item-group__title {
+    padding: 0;
+}
+
+.el-menu-item-group li.is-active {
+    background-color: #DDEDFF;
+}
+
+.el-menu .is-opened .el-submenu__title {
+    color: #000000 !important;
+}
+
+.carousel-control-next,
+.carousel-control-prev {
+    top: 110px;
+    bottom: initial;
+    width: 0;
+}
+
+#ref-cn ol {
+    padding: 1rem 1rem 1rem 56px;
+}
+
+#ref-en ul,
+.empty {
+    padding: 1rem 1rem 1rem 40px;
+}
+
+#ref-cn ol li, 
+#ref-en ul li {
+    padding-bottom: 10px;
+}
+
+#ref-en ul li{
+    list-style: none;
+}
+
+.clinical-block {
+    margin: 1rem;
+}
+
+.clinical-block p {
+    margin-bottom: 0.5rem;
+}
+
+.clinical-head {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.clinical-para{
+    padding-left: 1.5rem;
+}
+
+#intro-block {
+    margin: 1rem 0 2rem 0;
+}
+
+#drug-name {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 1rem
+}
+
+.mg-bt2 {
+    margin-bottom: 2rem;
+}
+
+.mg-bt1 {
+    margin-bottom: 10px;
+}
+
+#drugInfo .card-header a {
+    font-size: 18px;
+    font-weight: bold;
+    color: black;
+}
+
+.card-header a:hover {
+    color: #555555;
+    text-decoration: none;
+}
+
+.card-header {
+    background-color: rgba(0,0,0,.05);
+}
+
+.pd-left {
+    padding-left: 2rem;
+}
+
+#en-reaction {
+    margin-bottom: 3rem;
+}
+
+#drugInfo .no-wrap {
+    display: inline-block;
+    white-space: nowrap;
+    width: 200px
+}
+
+@media (max-width: 1300px) {
+    #banner{
+        padding-right: 15px;
+    }
+
+    #content {
+        width: calc(98% - 16rem);
+    }
+
+    #basic-table-div {
+        width: 100%;
+    }
+
+    #pics {
+        display: block;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    #other-info {
+        padding-right: 0;
+    }
+}
+
+@media (max-width: 1100px) {
+    #content {
+        width: calc(100% - 16rem);
+    }
+
+    #table-up table {
+        width: 100%;
+    }
+
+    #header-right {
+        width: 100%;
+        float: inherit; 
+    }
+
+    #header-right div {
+        align-self: inherit;
+    }
+
+    #header {
+        height: 7rem;
+    }
+
+    #search {
+        padding-right: 3rem;
+    }
+
+    #handbook {
+        padding-top: 0.5rem;
+    }
+}
+
+/* @media (max-width: 768px) {
+    #sidebar {
+        display: none
+    }
+
+    #header #search {
+        display: none;
+    }
+
+    #content {
+        width: 100%;
+        padding: 0;
+    }
+
+    #table-up table {
+        width: 100%;
+    }
+
+    #locator {
+        width: 300px;
+        margin: 0 auto;
+    }
+} */
