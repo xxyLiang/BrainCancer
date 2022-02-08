@@ -9,19 +9,18 @@ var en_reaction = {
         'Toremifene', 'Tramadol', 'Trastuzumab emtansine', 'Trazodone', 'Triazolam',
         'Triflupromazine', 'Trimethadione', 'Trimethoprim', 'Trimipramine', 'Troglitazone',
         'Umeclidinium', 'Valdecoxib', 'Vandetanib', 'Vecuronium', 'Venetoclax',
-        'Zalcitabine', 'Zaleplon', 'Zileuton', 'Ziprasidone', 'Zonisamide',],
+        'Zalcitabine', 'Zaleplon', 'Zileuton', 'Ziprasidone', 'Zonisamide',
+    ],
     "卡马西平": ['Cyclizine', 'Cyclobenzaprine', 'Cyclosporine', 'Cyproheptadine', 'Dabigatran etexilate',
         'Danazol', 'Dapiprazole', 'Dapsone', 'Darifenacin', 'Etizolam', 'Etodolac', 'Etoposide', 'Etoricoxib',
         'Etorphine', 'Everolimus', 'Famciclovir', 'Felbamate', 'Fencamfamine', 'Fentanyl', 'Lumacaftor',
         'Lumiracoxib', 'Lurasidone', 'Maprotiline', 'Maraviroc', 'Mebendazole', 'Medrysone', 'Megestrol acetate',
         'Melatonin', 'Meloxicam', 'Mephenytoin', 'Mepivacaine', 'Meprobamate', 'Oxprenolol', 'Oxymorphone', 'Palbociclib', 'Paliperidone', 'Palonosetron',
-        'Quinidine', 'Rabeprazole', 'Raclopride', 'Raloxifene', 'Ranitidine', 'Tacrine', 'Tacrolimus', 'Tadalafil', 'Tamoxifen', 'Tamsulosin']
+        'Quinidine', 'Rabeprazole', 'Raclopride', 'Raloxifene', 'Ranitidine', 'Tacrine', 'Tacrolimus', 'Tadalafil', 'Tamoxifen', 'Tamsulosin'
+    ]
 }
-var driver = neo4j.driver(
-    'neo4j://127.0.0.1/',
-    neo4j.auth.basic('user', 'password')
-)
-var get_tree_json = function () {
+
+var get_tree_json = function() {
     var xhttp = new XMLHttpRequest();
     xhttp.open("GET", "data/static/tree.json", async = false);
     xhttp.send();
@@ -30,7 +29,7 @@ var get_tree_json = function () {
 var tree_json = get_tree_json();
 var first_tumor = tree_json[0][0].id;
 
-var get_json = function (tumor) {
+var get_json = function(tumor) {
     var xhttp = new XMLHttpRequest();
     xhttp.open("GET", "data/static/" + tumor + ".json", async = false);
     xhttp.send();
@@ -51,18 +50,18 @@ function load_clinical_path(path) {
     return JSON.parse(xhttp.responseText);
 }
 
-var get_search_json = function () {
+var get_search_json = function() {
     var xhttp = new XMLHttpRequest();
     xhttp.open("GET", "data/static/search.json", async = false);
     xhttp.send();
     return JSON.parse(xhttp.responseText);
 }
 
-var set_nav_height = function () {
+var set_nav_height = function() {
     $(".nav-bar").css("max-height", ($("#content").height() > window.innerHeight - 5 * rem) ? ($("#content").height() - 4 * rem) : (window.innerHeight - 9 * rem))
 }
 
-var set_none_style = function () {
+var set_none_style = function() {
     $("#content span").css({
         "font-style": "inherit",
         "color": "inherit",
@@ -80,7 +79,7 @@ var vt = new Vue({
         current_nav: 1,
     },
     methods: {
-        change_content: function (tumor) {
+        change_content: function(tumor) {
             vm.js = get_json(tumor);
             this.$nextTick(() => {
                 vm.change_card(1);
@@ -90,7 +89,7 @@ var vt = new Vue({
                 set_none_style();
             })
         },
-        change_tree: function (index) {
+        change_tree: function(index) {
             this.current_nav = index;
             var path = "#tree" + index.toString() + " .el-menu-item.is-active";
             this.change_content($(path).attr("id").slice(0, -2));
@@ -114,30 +113,30 @@ var vm = new Vue({
         current_drug: '',
         other_drug: '',
     },
-    created: function () {
+    created: function() {
         this.update_clinical_exist();
     },
     methods: {
-        change_card: function (index) {
+        change_card: function(index) {
             this.card_show = index;
             this.$nextTick(() => {
                 set_nav_height();
             })
         },
         // 这个是点击卡片内的相似肿瘤时触发
-        change_page: function (tumor) {
+        change_page: function(tumor) {
             tumor_id = tumor + '_2'
-            vt.current_nav = 2;    // 把导航栏换到第二个
+            vt.current_nav = 2; // 把导航栏换到第二个
             var submenuNode = document.getElementById(tumor_id).parentNode.parentNode.parentNode.previousSibling
             if (!submenuNode.parentNode.classList.contains("is-opened")) {
-                submenuNode.click();    // 先展开子菜单
+                submenuNode.click(); // 先展开子菜单
             }
-            document.getElementById(tumor_id).click();         // 点击相应肿瘤
-            setTimeout(function () {
+            document.getElementById(tumor_id).click(); // 点击相应肿瘤
+            setTimeout(function() {
                 document.getElementById("tree2").scrollTop += ($("#" + tumor_id).offset().top - 9 * rem);
             }, 400);
         },
-        update_clinical_exist: function () {
+        update_clinical_exist: function() {
             var target = ["D32.", "C71.", "D43", "D16"]
             for (const key in target) {
                 if (this.js.content.ICD_10Code[0].indexOf(target[key]) != -1) {
@@ -149,51 +148,33 @@ var vm = new Vue({
             this.clinical_path_exist = false;
         },
         // 点击卡片内的脑区时触发
-        scroll: function (structure) {
-            vt.current_nav = 3;    // 把导航栏换到脑区
+        scroll: function(structure) {
+            vt.current_nav = 3; // 把导航栏换到脑区
             if (!document.getElementById(structure).classList.contains("is-opened")) {
-                document.getElementById(structure).firstChild.click();      // 展开子菜单
+                document.getElementById(structure).firstChild.click(); // 展开子菜单
             }
-            setTimeout(function () {
+            setTimeout(function() {
 
-                document.getElementById("tree3").scrollTop += ($("#" + structure).offset().top - 9 * rem);    // 滚动
+                document.getElementById("tree3").scrollTop += ($("#" + structure).offset().top - 9 * rem); // 滚动
             }, 300)
         },
-        get_drug: function (id) {
-            var session = driver.session({ defaultAccessMode: neo4j.session.READ });
-            var match_string = "MATCH (n1:`药物`)-[r:`相互作用`]-(n2:`药物`) where n1.value='" + id + "' return n1,r,n2 limit 5"
-            this.relations = []
-            this.subjectInfo = {}
-            this.current_drug = id
-            session
-                .run(match_string)
-                .then(result => {
-                    var count = 0
-                    result.records.forEach(record => {
-                        var temp = {};
-                        if (count == 0) {
-                            this.subjectInfo['name'] = record.get('n1').properties.value
-                            if (record.get('n1').properties.hasOwnProperty('indication')) {
-                                this.subjectInfo['indication'] = record.get('n1').properties.indication
-                            }
-                            count = 1
-                        }
-                        temp['object'] = record.get('n2').properties.value
-                        temp['level'] = record.get('r').properties.level
-                        temp['statement'] = record.get('r').properties.statement
-                        if (record.get('r').properties.hasOwnProperty('intro')) {
-                            temp['intro'] = record.get('r').properties.intro
-                        }
-                        this.relations.push(temp)
-                    })
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-                .then(() => session.close())
+
+        get_drug: function(id) {
+            this.relations = [];
+            this.subjectInfo = {};
+            var xhr = new XMLHttpRequest();
+            this.current_drug = id;
+            xhr.open('GET', 'http://ihealth.whu.edu.cn:8080/get?drug=' + id, async = false);
+            xhr.send();
+            if (xhr.status === 200) {
+                var result = JSON.parse(xhr.responseText);
+                this.relations = result['relations'];
+                this.subjectInfo = result['subjectInfo'];
+            };
         },
+
         get_other_drug: function(id) {
-            if (document.getElementById('drug-header').textContent.split(' ').indexOf(id) == -1){
+            if (document.getElementById('drug-header').textContent.split(' ').indexOf(id) == -1) {
                 this.other_drug = id
             }
             this.get_drug(id);
@@ -211,23 +192,22 @@ var se = new Vue({
         result: {},
     },
     watch: {
-        input: function (newInput, oldInput) {
+        input: function(newInput, oldInput) {
             if (this.input != '') {
                 this.search_status = '查询中'
                 this.debouncedGetResult();
                 this.show_search_box = true;
-            }
-            else {
+            } else {
                 this.show_search_box = false;
                 result = {}
             }
         },
     },
-    created: function () {
+    created: function() {
         this.debouncedGetResult = _.debounce(this.getResult, 500)
     },
     methods: {
-        getResult: function () {
+        getResult: function() {
             if (this.input == '') {
                 return
             }
@@ -259,21 +239,19 @@ var se = new Vue({
                 this.search_status = "无匹配项"
             }
         },
-        jump_to: function (tumor_id) {
+        jump_to: function(tumor_id) {
             vm.change_page(tumor_id);
             this.show_search_box = false;
         }
     }
 })
 
-$(document).ready(function () {
+$(document).ready(function() {
     set_nav_height();
     set_none_style();
     rem = parseFloat($("html").css('font-size'));
 });
 
-window.onresize = function () {
+window.onresize = function() {
     set_nav_height();
 }
-
-
