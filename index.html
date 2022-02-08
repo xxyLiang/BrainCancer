@@ -7,14 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>颅脑肿瘤大数据知识服务系统</title>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/vue.js"></script>
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/neo4j-driver@4.1.2/lib/browser/neo4j-web.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <link rel="icon" href="favicon.ico">
@@ -36,18 +33,15 @@
             <div id="search" class="form-inline my-lg-0">
                 <div id="input-box" style="width: 300px;">
                     <img src="img/search.svg" alt="搜索" width="20" height="20">
-                    <input v-model="input" class="form-control mr-sm-2" type="text" placeholder="搜索肿瘤名称、编码"
-                        aria-label="Search" style="width: 100%;" v-on:keyup.enter="show_search_box = true">
+                    <input v-model="input" class="form-control mr-sm-2" type="text" placeholder="搜索肿瘤名称、编码" aria-label="Search" style="width: 100%;" v-on:keyup.enter="show_search_box = true">
                 </div>
-                <ul v-if="show_search_box" id="search-result" class="list-group"
-                    style="position: absolute; z-index: 99">
+                <ul v-if="show_search_box" id="search-result" class="list-group" style="position: absolute; z-index: 99">
                     <div v-if="!Object.keys(result).length">
                         <li class="list-group-item">{{ search_status }}</li>
                     </div>
                     <div v-for="(value, group) in result">
                         <p class="group-name">{{ group }}</p>
-                        <a v-for="tumor in value" class="list-group-item" href="javascript:;"
-                            @click="jump_to(tumor[0])">
+                        <a v-for="tumor in value" class="list-group-item" href="javascript:;" @click="jump_to(tumor[0])">
                             {{tumor[1].slice(0,tumor[2])}}<span>{{tumor[1].slice(tumor[2], tumor[3])}}</span>{{tumor[1].slice(tumor[3])}}</a>
                     </div>
                 </ul>
@@ -72,11 +66,9 @@
                 <div id="tree1" v-show="current_nav == 1" class="nav-bar" style="overflow-y: hidden;">
                     <el-row class="tac">
                         <el-col :span="24">
-                            <el-menu default-active="tumor_child_9" class="el-menu-vertical-demo" unique-opened
-                                text-color="#777777" active-text-color="#000000">
+                            <el-menu default-active="tumor_child_9" class="el-menu-vertical-demo" unique-opened text-color="#777777" active-text-color="#000000">
                                 <el-menu-item-group>
-                                    <el-menu-item v-for="tumor in tree[0]" :index="tumor.id" :id="tumor.id + '_1'"
-                                        :key="tumor.id" @click="change_content(tumor.id)">
+                                    <el-menu-item v-for="tumor in tree[0]" :index="tumor.id" :id="tumor.id + '_1'" :key="tumor.id" @click="change_content(tumor.id)">
                                         <span>{{ tumor.label[0] }}</span></el-menu-item>
                                 </el-menu-item-group>
                             </el-menu>
@@ -86,16 +78,13 @@
                 <div id="tree2" v-show="current_nav == 2" class="nav-bar">
                     <el-row class="tac">
                         <el-col :span="24">
-                            <el-menu default-active="tumor_child_1" class="el-menu-vertical-demo" unique-opened
-                                text-color="#777777" active-text-color="#000000">
-                                <el-submenu v-for="(big_class, index) in tree[1]" :index="index.toString()"
-                                    :key="big_class.id">
+                            <el-menu default-active="tumor_child_1" class="el-menu-vertical-demo" unique-opened text-color="#777777" active-text-color="#000000">
+                                <el-submenu v-for="(big_class, index) in tree[1]" :index="index.toString()" :key="big_class.id">
                                     <template slot="title">
                                         <span> {{big_class.label}} </span>
                                     </template>
                                     <el-menu-item-group>
-                                        <el-menu-item v-for="tumor in big_class.children" :index="tumor.id"
-                                            :id="tumor.id + '_2'" :key="tumor.id" @click="change_content(tumor.id)">
+                                        <el-menu-item v-for="tumor in big_class.children" :index="tumor.id" :id="tumor.id + '_2'" :key="tumor.id" @click="change_content(tumor.id)">
                                             <span>{{ tumor.label[0] }}</span></el-menu-item>
                                     </el-menu-item-group>
                                 </el-submenu>
@@ -106,17 +95,13 @@
                 <div id="tree3" v-show="current_nav == 3" class="nav-bar">
                     <el-row class="tac">
                         <el-col :span="24">
-                            <el-menu default-active="中脑tumor_child_3" class="el-menu-vertical-demo" unique-opened
-                                text-color="#777777" active-text-color="#000000">
-                                <el-submenu v-for="(item, key, index) in tree[2][0]" :index="index.toString()"
-                                    :key="index" :id="key">
+                            <el-menu default-active="中脑tumor_child_3" class="el-menu-vertical-demo" unique-opened text-color="#777777" active-text-color="#000000">
+                                <el-submenu v-for="(item, key, index) in tree[2][0]" :index="index.toString()" :key="index" :id="key">
                                     <template slot="title">
                                         <span> {{ key }} </span>
                                     </template>
                                     <el-menu-item-group>
-                                        <el-menu-item v-for="tumor in item" :index="key + tumor.id"
-                                            :id="tumor.id + '_3'" :key="key + tumor.id"
-                                            @click="change_content(tumor.id)">
+                                        <el-menu-item v-for="tumor in item" :index="key + tumor.id" :id="tumor.id + '_3'" :key="key + tumor.id" @click="change_content(tumor.id)">
                                             <span>{{ tumor.name }}</span></el-menu-item>
                                     </el-menu-item-group>
                                 </el-submenu>
@@ -192,15 +177,12 @@
                                     <span>暂时没有图片</span>
                                 </div> -->
                             </div>
-                            <div v-else id="carouselExampleIndicators" class="carousel slide" data-ride="carousel"
-                                :key="current_tumor">
+                            <div v-else id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" :key="current_tumor">
                                 <ol class="carousel-indicators" style="position: absolute; bottom: 6rem;">
-                                    <li v-for="(text, pic, ind) in js.pics" data-target="#carouselExampleIndicators"
-                                        :data-slide-to="ind" :class="{active: !ind}" style="width: 16px;"></li>
+                                    <li v-for="(text, pic, ind) in js.pics" data-target="#carouselExampleIndicators" :data-slide-to="ind" :class="{active: !ind}" style="width: 16px;"></li>
                                 </ol>
                                 <div class="carousel-inner">
-                                    <div v-for="(text, pic, index) in js.pics" class="carousel-item"
-                                        :class="{active: !index}">
+                                    <div v-for="(text, pic, index) in js.pics" class="carousel-item" :class="{active: !index}">
                                         <div class="pic-caption-container">
                                             <div id="img-locator">
                                                 <img :src="'data/pics/'+pic.toLowerCase()+'.jpg'" class="d-block w-100">
@@ -211,13 +193,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button"
-                                    data-slide="prev">
+                                <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
                                     <span><img src="img/chevron-left.svg" width="24" height="24" title="上一张"></span>
                                     <span class="sr-only">Previous</span>
                                 </a>
-                                <a class="carousel-control-next" href="#carouselExampleIndicators" role="button"
-                                    data-slide="next">
+                                <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
                                     <span><img src="img/chevron-right.svg" width="24" height="24" title="下一张"></span>
                                     <span class="sr-only">Next</span>
                                 </a>
@@ -230,28 +210,22 @@
                         <div class="card-header">
                             <ul class="nav nav-pills card-header-pills">
                                 <li class="nav-item">
-                                    <a class="nav-link" :class="{active: card_show == 1}" href="javascript:;"
-                                        @click="change_card(1)">疾病特征</a>
+                                    <a class="nav-link" :class="{active: card_show == 1}" href="javascript:;" @click="change_card(1)">疾病特征</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" :class="{active: card_show == 2}" href="javascript:;"
-                                        @click="change_card(2)">辅助诊断</a>
+                                    <a class="nav-link" :class="{active: card_show == 2}" href="javascript:;" @click="change_card(2)">辅助诊断</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" :class="{active: card_show == 3}" href="javascript:;"
-                                        @click="change_card(3)">影像描述</a>
+                                    <a class="nav-link" :class="{active: card_show == 3}" href="javascript:;" @click="change_card(3)">影像描述</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" :class="{active: card_show == 4}" href="javascript:;"
-                                        @click="change_card(4)">临床路径</a>
+                                    <a class="nav-link" :class="{active: card_show == 4}" href="javascript:;" @click="change_card(4)">临床路径</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" :class="{active: card_show == 5}" href="javascript:;"
-                                        @click="change_card(5);get_drug('头孢曲松')">辅助药物</a>
+                                    <a class="nav-link" :class="{active: card_show == 5}" href="javascript:;" @click="change_card(5);get_drug('头孢曲松')">辅助药物</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" :class="{active: card_show == 6}" href="javascript:;"
-                                        @click="change_card(6)">参考文献</a>
+                                    <a class="nav-link" :class="{active: card_show == 6}" href="javascript:;" @click="change_card(6)">参考文献</a>
                                 </li>
                             </ul>
                         </div>
@@ -265,8 +239,7 @@
                                     <td>易发人群：</td>
                                     <td v-if="js.content.hasHighOccurrenceRateIn[0] == '暂缺'"><span>暂缺</span></td>
                                     <td v-else>
-                                        <span
-                                            v-for="value in js.content.hasHighOccurrenceRateIn">{{ value[1] }}&emsp;</span>
+                                        <span v-for="value in js.content.hasHighOccurrenceRateIn">{{ value[1] }}&emsp;</span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -282,10 +255,10 @@
                                 </tr>
                                 <tr>
                                     <td>临床表现：</th>
-                                    <td v-if="js.content.hasSymptoms[0] == '暂缺'"><span>暂缺</span></td>
-                                    <td v-else>
-                                        <span v-for="value in js.content.hasSymptoms">{{ value[1] }}&emsp;</span>
-                                    </td>
+                                        <td v-if="js.content.hasSymptoms[0] == '暂缺'"><span>暂缺</span></td>
+                                        <td v-else>
+                                            <span v-for="value in js.content.hasSymptoms">{{ value[1] }}&emsp;</span>
+                                        </td>
                                 </tr>
                                 <tr>
                                     <td>病因</td>
@@ -310,8 +283,7 @@
                                     <td>诊断项目：</td>
                                     <td v-if="js.content.isDiagnosedBy[0] == '暂缺'"><span>暂缺</span></td>
                                     <td v-else>
-                                        <span v-for="value in js.content.isDiagnosedBy"
-                                            :name="value.id">{{ value[1] }}&emsp;&emsp;</span>
+                                        <span v-for="value in js.content.isDiagnosedBy" :name="value.id">{{ value[1] }}&emsp;&emsp;</span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -332,8 +304,7 @@
                                 </tr>
                             </table>
                         </div>
-                        <div id="clinical-path" v-show="card_show == 4" class="card-body overflow-auto"
-                            style="max-height: 30rem" :key="current_tumor">
+                        <div id="clinical-path" v-show="card_show == 4" class="card-body overflow-auto" style="max-height: 30rem" :key="current_tumor">
                             <div v-if="clinical_path_exist">
                                 <div v-for="(paras, key) in clinical_path_content" class="clinical-block">
                                     <p class="clinical-head">{{ key }}</p>
@@ -344,41 +315,32 @@
                                     <div><img src="img/diabete.png" width="100%"></div>
                                 </div>
                             </div>
-                            <div v-else style="padding: 2rem;"><span
-                                    style="font-style: italic; color: #999999;">暂缺</span></div>
+                            <div v-else style="padding: 2rem;"><span style="font-style: italic; color: #999999;">暂缺</span></div>
                         </div>
                         <div id="drug" v-show="card_show == 5" class="card-body">
                             <div v-if="clinical_path_exist">
-                                <div id="drug-header" class="card-header"
-                                    style="background-color:rgba(0, 0, 255, 0.05)">
+                                <div id="drug-header" class="card-header" style="background-color:rgba(0, 0, 255, 0.05)">
                                     <ul class="nav nav-pills card-header-pills">
                                         <li class="nav-item">
-                                            <a class="nav-link" :class="{active: current_drug == '头孢曲松'}"
-                                                href="javascript:;" @click="get_drug('头孢曲松')">头孢曲松</a>
+                                            <a class="nav-link" :class="{active: current_drug == '头孢曲松'}" href="javascript:;" @click="get_drug('头孢曲松')">头孢曲松</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" :class="{active: current_drug == '氢化可的松'}"
-                                                href="javascript:;" @click="get_drug('氢化可的松')">氢化可的松</a>
+                                            <a class="nav-link" :class="{active: current_drug == '氢化可的松'}" href="javascript:;" @click="get_drug('氢化可的松')">氢化可的松</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" :class="{active: current_drug == '甘露醇'}"
-                                                href="javascript:;" @click="get_drug('甘露醇')">甘露醇</a>
+                                            <a class="nav-link" :class="{active: current_drug == '甘露醇'}" href="javascript:;" @click="get_drug('甘露醇')">甘露醇</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" :class="{active: current_drug == '地塞米松'}"
-                                                href="javascript:;" @click="get_drug('地塞米松')">地塞米松</a>
+                                            <a class="nav-link" :class="{active: current_drug == '地塞米松'}" href="javascript:;" @click="get_drug('地塞米松')">地塞米松</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" :class="{active: current_drug == '卡马西平'}"
-                                                href="javascript:;" @click="get_drug('卡马西平')">卡马西平</a>
+                                            <a class="nav-link" :class="{active: current_drug == '卡马西平'}" href="javascript:;" @click="get_drug('卡马西平')">卡马西平</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" :class="{active: current_drug == '丙戊酸钠'}"
-                                                href="javascript:;" @click="get_drug('丙戊酸钠')">丙戊酸钠</a>
+                                            <a class="nav-link" :class="{active: current_drug == '丙戊酸钠'}" href="javascript:;" @click="get_drug('丙戊酸钠')">丙戊酸钠</a>
                                         </li>
                                         <li class="nav-item" v-if="other_drug != ''">
-                                            <a class="nav-link" :class="{active: current_drug == other_drug}"
-                                                href="javascript:;" @click="get_drug(other_drug)">{{ other_drug }}</a>
+                                            <a class="nav-link" :class="{active: current_drug == other_drug}" href="javascript:;" @click="get_drug(other_drug)">{{ other_drug }}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -390,29 +352,21 @@
                                         <div class="mg-bt1" style="font-size: 18px;">药物相互作用</div>
                                         <div>
                                             <div class="card mg-bt1" v-for="relation in relations">
-                                                <div class="card-header"><a href="javascript:;"
-                                                        @click="get_other_drug(relation.object)">{{ relation.object }}</a>
+                                                <div class="card-header"><a href="javascript:;" @click="get_other_drug(relation.object)">{{ relation.object }}</a>
                                                 </div>
                                                 <div style="padding: 1rem 0 1rem 2rem;">
-                                                    <div class="mg-bt1"><img src="img/exclamation-circle.svg"
-                                                            width="12px">&ensp;预警级别</div>
+                                                    <div class="mg-bt1"><img src="img/exclamation-circle.svg" width="12px">&ensp;预警级别</div>
                                                     <div class="mg-bt1">
                                                         <div style="display: inline-block; margin-right: 2rem;">
                                                             <div class="progress" style="width: 200px">
-                                                                <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                                                    role="progressbar"
-                                                                    :style="'width:'+(120-relation.level*25).toString() + '%' "
-                                                                    :aria-valuenow="120-relation.level*25"
-                                                                    aria-valuemin="0" aria-valuemax="100"
-                                                                    :class="color_list[relation.level]"></div>
+                                                                <div class="progress-bar progress-bar-striped" role="progressbar" :style="'width:'+(120-relation.level*25).toString() + '%' " :aria-valuenow="120-relation.level*25" aria-valuemin="0" aria-valuemax="100" :class="color_list[relation.level]"></div>
                                                             </div>
                                                         </div>
                                                         <div class="statement" style="display: inline-block;">
                                                             {{ relation.statement }}</div>
                                                     </div>
                                                     <div v-if="relation.hasOwnProperty('intro')">
-                                                        <div class="mg-bt1"><img src="img/exclamation-circle.svg"
-                                                                width="12px">&ensp;作用机理</div>
+                                                        <div class="mg-bt1"><img src="img/exclamation-circle.svg" width="12px">&ensp;作用机理</div>
                                                         <div class="reaction-intro">{{ relation.intro }}</div>
                                                     </div>
                                                 </div>
@@ -430,8 +384,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div v-else style="padding: 2rem;"><span
-                                    style="font-style: italic; color: #999999;">暂缺</span></div>
+                            <div v-else style="padding: 2rem;"><span style="font-style: italic; color: #999999;">暂缺</span></div>
                         </div>
                         <div id="references" v-show="card_show == 6" class="card-body">
                             <div id="ref-cn"><strong>国内文献</strong>
